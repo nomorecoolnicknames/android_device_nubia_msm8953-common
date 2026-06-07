@@ -1,0 +1,17 @@
+# Copyright (C) 2026 The LineageOS Project
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+service vendor.netmgrd /vendor/bin/netmgrd
+    class main
+    user radio
+    group radio system inet wakelock oem_2901
+    capabilities NET_ADMIN NET_RAW BLOCK_SUSPEND
+
+service vendor.dpmQmiMgr /vendor/bin/dpmQmiMgr
+    class hal
+    user radio
+    group radio system inet wakelock oem_2901
+    capabilities NET_ADMIN NET_RAW BLOCK_SUSPEND
+    interface com.qualcomm.qti.dpm.api@1.0::IdpmQmi dpmQmiService

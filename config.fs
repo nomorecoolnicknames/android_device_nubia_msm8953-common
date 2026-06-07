@@ -160,6 +160,18 @@ user: AID_SYSTEM
 group: AID_SYSTEM
 caps: NET_BIND_SERVICE
 
+[vendor/bin/sensors.qcom]
+mode: 0755
+user: AID_SYSTEM
+group: AID_SYSTEM
+caps: NET_BIND_SERVICE
+
+[vendor/bin/init.persist_bind.sh]
+mode: 0755
+user: AID_ROOT
+group: AID_ROOT
+caps: 0
+
 [firmware/]
 mode: 0771
 user: AID_SYSTEM

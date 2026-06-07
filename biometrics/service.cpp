@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "android.hardware.biometrics.fingerprint@2.1-service.xiaomi_msm8953"
+#define LOG_TAG "biometrics.fingerprint@2.0-service"
+
+#include <binder/ProcessState.h>
 
 #include <android/log.h>
 #include <hidl/HidlSupport.h>
 #include <hidl/HidlTransportSupport.h>
 #include <android/hardware/biometrics/fingerprint/2.1/IBiometricsFingerprint.h>
 #include <android/hardware/biometrics/fingerprint/2.1/types.h>
+
 #include "BiometricsFingerprint.h"
 
 using android::hardware::biometrics::fingerprint::V2_1::IBiometricsFingerprint;
@@ -29,14 +32,23 @@ using android::hardware::configureRpcThreadpool;
 using android::hardware::joinRpcThreadpool;
 using android::sp;
 
+
 int main() {
+
+    ALOGI("Start biometrics");
     android::sp<IBiometricsFingerprint> bio = BiometricsFingerprint::getInstance();
 
-    configureRpcThreadpool(1, true /*callerWillJoin*/);
+    // the conventional HAL might start binder services
+    android::ProcessState::initWithDriver("/dev/binder");
+    android::ProcessState::self()->startThreadPool();
+
+    /* process Binder transaction as a single-threaded program. */
+    configureRpcThreadpool(1, true /* callerWillJoin */);
 
     if (bio != nullptr) {
-        if (::android::OK != bio->registerAsService()) {
-            return 1;
+        android::status_t ret = bio->registerAsService();
+        if (ret != android::OK) {
+            ALOGE("Cannot register BiometricsFingerprint service: %d", ret);
         }
     } else {
         ALOGE("Can't create instance of BiometricsFingerprint, nullptr");

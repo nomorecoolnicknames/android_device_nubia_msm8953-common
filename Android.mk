@@ -6,7 +6,7 @@
 
 LOCAL_PATH := $(call my-dir)
 
-ifneq ($(filter daisy mido sakura tissot vince ysl,$(TARGET_DEVICE)),)
+ifneq ($(filter nx549j,$(TARGET_DEVICE)),)
 
 include $(call all-makefiles-under,$(LOCAL_PATH))
 
@@ -104,5 +104,39 @@ $(WCNSS_MAC_SYMLINK): $(LOCAL_INSTALLED_MODULE)
 	$(hide) ln -sf /mnt/vendor/persist/$(notdir $@) $@
 
 ALL_DEFAULT_INSTALLED_MODULES += $(WCNSS_INI_SYMLINK) $(WCNSS_BIN_SYMLINK) $(WCNSS_DAT_SYMLINK) $(WCNSS_MAC_SYMLINK)
+
+PROTOBUF_FULL_COMPAT_SYMLINKS := \
+    $(TARGET_OUT_VENDOR)/lib/libprotobuf-cpp-full.so \
+    $(TARGET_OUT_VENDOR)/lib64/libprotobuf-cpp-full.so
+
+$(TARGET_OUT_VENDOR)/lib/libprotobuf-cpp-full.so: $(TARGET_OUT_VENDOR)/lib/libprotobuf-cpp-full-v29.so
+	@echo "Protobuf compat link: $@"
+	@mkdir -p $(dir $@)
+	@rm -rf $@
+	$(hide) ln -sf libprotobuf-cpp-full-v29.so $@
+
+$(TARGET_OUT_VENDOR)/lib64/libprotobuf-cpp-full.so: $(TARGET_OUT_VENDOR)/lib64/libprotobuf-cpp-full-v29.so
+	@echo "Protobuf compat link: $@"
+	@mkdir -p $(dir $@)
+	@rm -rf $@
+	$(hide) ln -sf libprotobuf-cpp-full-v29.so $@
+
+PROTOBUF_LITE_COMPAT_SYMLINKS := \
+    $(TARGET_OUT_VENDOR)/lib/libprotobuf-cpp-lite.so \
+    $(TARGET_OUT_VENDOR)/lib64/libprotobuf-cpp-lite.so
+
+$(TARGET_OUT_VENDOR)/lib/libprotobuf-cpp-lite.so: $(TARGET_OUT_VENDOR)/lib/libprotobuf-cpp-lite-3.9.1.so
+	@echo "Protobuf compat link: $@"
+	@mkdir -p $(dir $@)
+	@rm -rf $@
+	$(hide) ln -sf libprotobuf-cpp-lite-3.9.1.so $@
+
+$(TARGET_OUT_VENDOR)/lib64/libprotobuf-cpp-lite.so: $(TARGET_OUT_VENDOR)/lib64/libprotobuf-cpp-lite-v29.so
+	@echo "Protobuf compat link: $@"
+	@mkdir -p $(dir $@)
+	@rm -rf $@
+	$(hide) ln -sf libprotobuf-cpp-lite-v29.so $@
+
+ALL_DEFAULT_INSTALLED_MODULES += $(PROTOBUF_FULL_COMPAT_SYMLINKS) $(PROTOBUF_LITE_COMPAT_SYMLINKS)
 
 endif

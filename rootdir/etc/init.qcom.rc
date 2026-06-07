@@ -28,6 +28,7 @@
 import /vendor/etc/init/hw/init.qcom.usb.rc
 import /vendor/etc/init/hw/init.msm.usb.configfs.rc
 import /vendor/etc/init/hw/init.target.rc
+import /vendor/etc/init/hw/init.qcom.data.rc
 
 on early-init
     mount debugfs debugfs /sys/kernel/debug
@@ -51,6 +52,8 @@ on post-fs
     chmod 0755 /sys/kernel/debug/tracing
 
 on early-boot
+    setprop vendor.persist.bind.ready 0
+
     # set RLIMIT_MEMLOCK to 64MB
     setrlimit 8 67108864 67108864
     # Allow subsystem (modem etc) debugging
@@ -59,6 +62,10 @@ on early-boot
     write /sys/kernel/boot_slpi/boot 1
 
     # for backward compatibility
+    mount none /mnt/vendor/persist /persist bind
+    mkdir /persist/sensors 0775 system system
+    mkdir /persist/sensors/registry 0775 system system
+    mkdir /persist/sensors/registry/registry 0775 system system
     chown system system /persist/sensors
     chown system system /persist/sensors/registry
     chown system system /persist/sensors/registry/registry
@@ -93,6 +100,9 @@ on early-boot
     chmod 0664 /sys/class/graphics/fb0/msm_cmd_autorefresh_en
 
 on boot
+    mount none /mnt/vendor/persist /persist bind
+    mkdir /dev/socket/port-bridge 0750 radio radio
+
     chown system system /sys/bus/i2c/devices/3-0038/set_cover_mode
     chmod 0660 /sys/bus/i2c/devices/3-0038/set_cover_mode
     chown system system /sys/class/touch/sys/mode_cover
@@ -204,6 +214,8 @@ on boot
 # msm specific files that need to be created on /data
 on post-fs-data
     mkdir /data/vendor/misc 01771 system system
+    mkdir /data/vendor/port_bridge 0770 radio radio
+    chmod 0770 /data/vendor/port_bridge
 
     # Create directory used for dump collection
     mkdir /data/vendor/ssrdump 0770 root system
@@ -374,6 +386,9 @@ on post-fs-data
     chmod 2770 /data/vendor/swap
 
     # Sensors
+    mkdir /persist/sensors 0775 system system
+    mkdir /persist/sensors/registry 0775 system system
+    mkdir /persist/sensors/registry/registry 0775 system system
     chmod 0775 /persist/sensors
     chmod 0664 /persist/sensors/sensors_settings
     chown system root /persist/sensors/sensors_settings
@@ -402,6 +417,7 @@ service iop /system/vendor/bin/iop
 
 on property:sys.boot_completed=1
     write /dev/kmsg "Boot completed "
+    write /proc/frgmark_userspace_ack boot-completed
     #Reset read ahead for dm-0 and dm-1 to 512kb
     write /sys/block/dm-0/queue/read_ahead_kb 512
     write /sys/block/dm-1/queue/read_ahead_kb 512
@@ -444,6 +460,24 @@ service vendor.qrtr-ns /vendor/bin/qrtr-ns -f
     user vendor_qrtr
     group vendor_qrtr
     capabilities NET_BIND_SERVICE
+
+service ril-daemon /vendor/bin/hw/rild
+    class main
+    user radio
+    group radio cache inet misc audio sdcard_r sdcard_rw diag oem_2901 log readproc wakelock
+    capabilities BLOCK_SUSPEND NET_ADMIN NET_RAW
+
+service vendor.ril-daemon2 /vendor/bin/hw/rild -c 2
+    class main
+    user radio
+    group radio cache inet misc audio sdcard_r sdcard_rw diag oem_2901 log readproc wakelock
+    capabilities BLOCK_SUSPEND NET_ADMIN NET_RAW
+
+service vendor.port-bridge /vendor/bin/port-bridge
+    class main
+    user radio
+    group radio system inet
+    oneshot
 
 service irsc_util /vendor/bin/irsc_util "/vendor/etc/sec_config"
     class core
@@ -491,13 +525,32 @@ service vendor.sensors /vendor/bin/sscrpcd
     class core
     user system
     group system
+    disabled
     writepid /dev/cpuset/system-background/tasks
 
-service vendor.sensors.qti /vendor/bin/sensors.qti
-    class core
+service vendor.sensors.qti /vendor/bin/sensors.qcom
+    class main
     user system
     group system
+    capabilities NET_BIND_SERVICE
+    disabled
     writepid /dev/cpuset/system-background/tasks
+
+service vendor.persist-bind /system/bin/sh /vendor/bin/init.persist_bind.sh
+    class main
+    user root
+    group root system
+    oneshot
+    writepid /dev/cpuset/system-background/tasks
+
+on boot
+    start vendor.persist-bind
+
+on property:sys.boot_completed=1
+    start vendor.persist-bind
+
+on property:vendor.persist.bind.ready=1
+    start vendor.sensors.qti
 
 on property:ro.vendor.use_data_netmgrd=false
     # netmgr not supported on specific target
@@ -540,12 +593,6 @@ on property:ro.data.large_tcp_window_size=true
     # Adjust socket buffer to enlarge TCP receive window for high bandwidth (e.g. DO-RevB)
     write /proc/sys/net/ipv4/tcp_adv_win_scale  2
 
-service vendor.ril-daemon2 /vendor/bin/hw/rild -c 2
-    class main
-    user radio
-    group radio cache inet misc audio sdcard_r sdcard_rw diag log
-    capabilities BLOCK_SUSPEND NET_ADMIN NET_RAW
-
 service charger /system/bin/charger
     class charger
     user system
@@ -553,7 +600,7 @@ service charger /system/bin/charger
     capabilities SYS_BOOT
     seclabel u:r:charger:s0
 
-service vendor.msm_irqbalance /vendor/bin/msm_irqbalance -f /system/vendor/etc/msm_irqbalance.conf
+service vendor.msm_irqbalance /vendor/bin/msm_irqbalance -f /vendor/etc/msm_irqbalance.conf
     class core
     user root
     group root

@@ -35,6 +35,37 @@ else
     platformid=`cat /sys/devices/system/soc/soc0/id`
 fi
 
+bind_legacy_persist()
+{
+	for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+		if grep -q " /mnt/vendor/persist " /proc/mounts; then
+			if ! grep -q " /persist " /proc/mounts; then
+				mkdir -p /persist
+				mount -o bind /mnt/vendor/persist /persist
+			fi
+
+			if grep -q " /persist " /proc/mounts; then
+				mkdir -p /persist/sensors/registry/registry
+				chown system.system /persist/sensors
+				chown system.system /persist/sensors/registry
+				chown system.system /persist/sensors/registry/registry
+				chmod 0775 /persist/sensors
+				chmod 0775 /persist/sensors/registry
+				chmod 0775 /persist/sensors/registry/registry
+				setprop vendor.persist.bind.ready 1
+				log -t init.qcom.sh "bound /mnt/vendor/persist to /persist"
+				return
+			fi
+		fi
+
+		sleep 1
+	done
+
+	log -t init.qcom.sh "failed to bind /mnt/vendor/persist to /persist"
+}
+
+bind_legacy_persist
+
 start_battery_monitor()
 {
 	if ls /sys/bus/spmi/devices/qpnp-bms-*/fcc_data ; then
