@@ -1,3 +1,7 @@
 # Input devices
 r_dir_file(system_server, vendor_idc_file);
 r_dir_file(system_server, vendor_keylayout_file);
+
+# Goodix framework extension binds through the stock Goodix daemon.
+binder_call(system_server, gx_fpd)
+allow system_server gx_fpd_service:service_manager find;

@@ -26,6 +26,13 @@
 /dev/goodix_fp					u:object_r:gx_fpd_device:s0
 /data/gf_data(/.*)?                             u:object_r:gx_fpd_data_file:s0
 /persist/data/gxfp(/.*)?			u:object_r:gx_fpd_data_file:s0
+/(vendor|system/vendor)/bin/gx_fpd		u:object_r:gx_fpd_exec:s0
+
+# NFC
+/dev/bcm2079x					u:object_r:nfc_device:s0
+
+# Camera
+/data/vendor/qcam(/.*)?				u:object_r:vendor_camera_data_file:s0
 
 # Firmware
 /firmware                                                     u:object_r:firmware_file:s0

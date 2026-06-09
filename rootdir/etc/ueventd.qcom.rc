@@ -33,6 +33,7 @@ firmware_directories /vendor/firmware_mnt/image/
 # the DIAG device node is not world writable/readable.
 /dev/diag                 0660   system     oem_2901
 
+/dev/bcm2079x             0660   nfc        nfc
 /dev/genlock              0666   system     system
 /dev/wlan                 0660   wifi       wifi
 /dev/kgsl                 0666   system     system
@@ -391,4 +392,3 @@ firmware_directories /vendor/firmware_mnt/image/
 # lirc
 /dev/lirc0                0660   system     system
 /dev/peel_ir              0660   system     system
-

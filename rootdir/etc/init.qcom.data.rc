@@ -5,9 +5,8 @@
 
 service vendor.netmgrd /vendor/bin/netmgrd
     class main
-    user radio
-    group radio system inet wakelock oem_2901
-    capabilities NET_ADMIN NET_RAW BLOCK_SUSPEND
+    # netmgrd must start as root and drops to radio internally. Starting it
+    # directly as radio exits with status 1 before it can configure rmnet.
 
 service vendor.dpmQmiMgr /vendor/bin/dpmQmiMgr
     class hal

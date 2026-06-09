@@ -1,2 +1,5 @@
 # Dirac
 type dirac_prop, property_type;
+
+# Goodix fingerprint daemon readiness and version properties.
+type gx_fpd_prop, property_type;
