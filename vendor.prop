@@ -59,6 +59,36 @@ persist.camera.isp.clock.optmz=0
 persist.camera.ltmforseemore=0
 persist.camera.stats.af.paaf=0
 persist.camera.stats.test=5
+
+# NX549J camera bring-up defaults. Keep metadata and generic PP enabled;
+# guard known-bad CDS/DSDN and postview capture paths separately.
+persist.camera.force_bringup_preview=1
+persist.camera.force_bringup_preview_size=1920x1080
+persist.camera.force_bringup_picture_size=1920x1080
+persist.camera.force_bringup_preview_format=nv21
+persist.camera.force_bringup_preview_bufs=3
+persist.camera.force_bringup_qbuf_all=0
+persist.camera.force_bringup_no_metadata=0
+persist.camera.force_bringup_no_cpp_cds=1
+persist.camera.force_bringup_no_postview=1
+persist.camera.nx549j.capture_no_metadata=0
+persist.camera.nx549j.capture_notify_burst=0
+persist.camera.nx549j.capture_explicit_request=0
+persist.camera.force_bringup_no_pp=0
+persist.camera.hal3.bringup_no_pp=0
+persist.camera.force_bringup_skip_pproc_init=0
+persist.camera.force_bringup_skip_thermal_fps=1
+persist.camera.force_bringup_skip_ois=1
+persist.camera.force_bringup_skip_unsafe_snapshot_batch=1
+persist.camera.force_bringup_predeclare_snapshot_stream=0
+persist.camera.force_bringup_skip_late_snapshot_stream_info=1
+persist.camera.force_bringup_skip_online_rotation=1
+persist.camera.force_bringup_skip_update_debug_level=1
+persist.camera.disable_analysis_stream=1
+persist.camera.disable_callback_stream=1
+persist.camera.bringup_streamon_delay_ms=2200
+persist.camera.bringup_snapshot_streamon_delay_ms=0
+persist.camera.nx549j.snapshot_watchdog_ms=0
 persist.vendor.qti.telephony.vt_cam_interface=1
 vidc.enc.dcvs.extra-buff-count=2
 

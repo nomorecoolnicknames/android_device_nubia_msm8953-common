@@ -51,6 +51,21 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/handheld_core_hardware.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/handheld_core_hardware.xml \
     $(LOCAL_PATH)/configs/privapp-permissions-nubia-qti.xml:system/etc/permissions/privapp-permissions-nubia-qti.xml
 
+# Camera2 API feature XML stays opt-in until legacy preview is stable.
+NX549J_ENABLE_CAMERA2_FULL ?= false
+NX549J_ENABLE_CAMERA2_RAW ?= false
+NX549J_ENABLE_CAMERA2_HFR ?= false
+
+ifeq ($(NX549J_ENABLE_CAMERA2_FULL),true)
+PRODUCT_COPY_FILES += \
+    frameworks/native/data/etc/android.hardware.camera.full.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.full.xml
+endif
+
+ifeq ($(NX549J_ENABLE_CAMERA2_RAW),true)
+PRODUCT_COPY_FILES += \
+    frameworks/native/data/etc/android.hardware.camera.raw.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.raw.xml
+endif
+
 # ANT
 PRODUCT_PACKAGES += \
     AntHalService \
