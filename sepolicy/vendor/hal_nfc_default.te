@@ -1,0 +1,6 @@
+wakelock_use(hal_nfc_default)
+
+# Keep the vendor HAL on Treble-safe paths. Configuration is duplicated under
+# /vendor/etc and /data/nfc remains owned by the core NFC service; granting a
+# vendor domain direct access to system_file or core nfc_data_file violates
+# Android 11 neverallow rules and hides a real partitioning bug.
