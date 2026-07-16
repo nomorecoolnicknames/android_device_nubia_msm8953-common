@@ -1,0 +1,44 @@
+# NX549J Fix C4 — fp_compat linker-namespace reference (NOT WIRED / REFERENCE ONLY)
+#
+# This file documents the "ideal" isolated-linker-namespace variant of the
+# A9/VNDK-v28 ABI shim for the Goodix fingerprint blob. It is a DESIGN REFERENCE
+# only — it is NOT copied by any Android.mk / device.mk and is NOT read at
+# runtime. The mechanism actually shipped by Fix C4 is the LD_LIBRARY_PATH
+# scoping in:
+#   - device/nubia/msm8953-common/biometrics/android.hardware.biometrics.fingerprint@2.1-service.nubia.rc
+#   - device/nubia/nx549j/rootdir/init.nx549j.rc  (gx_fpd)
+# plus the /vendor/lib64/fp_compat PRODUCT_COPY_FILES in device/nubia/nx549j/device.mk.
+#
+# WHY NOT A REAL NAMESPACE ON ANDROID 11:
+# On A11 the runtime linker config (/linkerconfig/ld.config.txt) is generated at
+# first boot by the `linkerconfig` binary from system/linkerconfig — the static
+# ld.config.*.txt files under prebuilts/vndk/v2x/ are NOT consulted at runtime.
+# Creating a dedicated, per-executable vendor namespace therefore requires
+# patching system/linkerconfig (the contents generator), which lands in the
+# SYSTEM image. That violates the Fix C4 "vendor-image-only, boot.img-independent"
+# constraint. The vendor-only /vendor/etc/linker.config.pb hook can add search
+# paths / allowed libs to the EXISTING vendor namespace, but cannot cleanly carve
+# a separate namespace with a shadowing libbinder for one service. Hence
+# LD_LIBRARY_PATH scoping is the least-invasive vendor-only delivery.
+#
+# ---- Reference namespace definition (would live in the vendor section of the
+# ---- generated ld.config if system/linkerconfig were patched) ----
+#
+# [fp_compat]
+# additional.namespaces = fp_compat
+# namespace.fp_compat.isolated = true
+# namespace.fp_compat.search.paths = /vendor/lib64/fp_compat:/vendor/${LIB}:/vendor/${LIB}/hw
+# namespace.fp_compat.permitted.paths = /vendor/lib64/fp_compat:/vendor/${LIB}
+# # fall back to the normal vendor namespace for libc/libm/libdl/liblog/libhardware/etc.
+# namespace.fp_compat.links = vendor,default
+# namespace.fp_compat.link.vendor.shared_libs = libhardware.so:liblog.so:libbase.so:libhwbinder.so:libhidlbase.so
+# namespace.fp_compat.link.default.shared_libs = libc.so:libm.so:libdl.so:libstdc++.so
+#
+# ABI-sensitive libs served locally from /vendor/lib64/fp_compat (VNDK v28 = A9):
+#   libbinder.so   (prebuilts/vndk/v28/arm64/arch-arm64-armv8-a/shared/vndk-core/libbinder.so)
+#   libutils.so    (prebuilts/vndk/v28/arm64/arch-arm64-armv8-a/shared/vndk-sp/libutils.so)
+#   libcutils.so   (prebuilts/vndk/v28/arm64/arch-arm64-armv8-a/shared/vndk-sp/libcutils.so)
+#   libc++.so      (prebuilts/vndk/v28/arm64/arch-arm64-armv8-a/shared/vndk-sp/libc++.so)
+#
+# libstdc++.so / libm.so / libc.so / libdl.so are stable bionic/system libs and
+# are intentionally NOT shimmed.
