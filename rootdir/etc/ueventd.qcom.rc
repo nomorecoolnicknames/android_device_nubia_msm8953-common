@@ -241,6 +241,18 @@ firmware_directories /vendor/firmware_mnt/image/
 /sys/devices/virtual/optical_sensors/proximity      ps_poll_delay  0660    input    system
 /sys/devices/virtual/optical_sensors/lightsensor    ls_auto        0660    input    system
 /sys/devices/virtual/optical_sensors/lightsensor    ls_poll_delay  0660    input    system
+# NX549J nubia_sensors (TXC PA224 prox + ROHM BH1745 light): HAL runs as system
+# and writes these attrs; kernel creates them root:root so without these rules
+# every enable/init write fails with EPERM (sensors listed but never activate)
+/sys/devices/virtual/proximity/proximity            enable           0660    system    system
+/sys/devices/virtual/proximity/proximity            delay            0660    system    system
+/sys/devices/virtual/proximity/proximity            prox_init        0660    system    system
+/sys/devices/virtual/proximity/proximity            prox_thres       0660    system    system
+/sys/devices/virtual/proximity/proximity            prox_offset_cal  0660    system    system
+/sys/devices/virtual/light/light                    enable           0660    system    system
+/sys/devices/virtual/light/light                    delay            0660    system    system
+/sys/devices/virtual/light/light                    dev_init         0660    system    system
+/sys/devices/virtual/light/light                    calibrate        0660    system    system
 /sys/devices/virtual/input/input*                   poll           0660    input    system
 /sys/devices/virtual/input/input*                   pollrate_ms    0660    input    system
 /sys/devices/soc/78b7000.i2c/i2c-3/3-0020/input/input*    secure_touch         0440   system  drmrpc
