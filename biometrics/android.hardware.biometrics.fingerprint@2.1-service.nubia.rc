@@ -1,5 +1,11 @@
 service fps_hal /vendor/bin/hw/android.hardware.biometrics.fingerprint@2.1-service.nubia
     interface android.hardware.biometrics.fingerprint@2.1::IBiometricsFingerprint default
+    # NX549J Fix C4: resolve the A6/A9-ABI libbinder/libutils/libcutils/libc++ that
+    # the Goodix blob (libfp_client.so, dlopen'd via the HAL) links against, from the
+    # device-owned VNDK-v28 compat dir instead of A11's system copies. Scoped to this
+    # service only; the rest of the vendor namespace still uses the stock VNDK.
+    setenv LD_LIBRARY_PATH /vendor/lib64/fp_compat
+    setenv LD_PRELOAD /vendor/lib64/fp_compat/libbindershim.so
     # "class hal" causes a race condition on some devices due to files created
     # in /data. As a workaround, postpone startup until later in boot once
     # /data is mounted.
