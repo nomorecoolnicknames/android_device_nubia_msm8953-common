@@ -138,7 +138,12 @@ BOARD_VENDOR_SEPOLICY_DIRS += $(COMMON_PATH)/sepolicy/vendor
 # Treble
 PRODUCT_FULL_TREBLE_OVERRIDE := true
 BOARD_VNDK_VERSION := current
-ifeq ($(NX549J_EXPERIMENTAL_GSI_AONLY),true)
+# NX549J_FULL_VNDK=true drops the VNDK-lite runtime relaxation (ro.vndk.lite)
+# and gives the strict isolated vendor linker namespace, WITHOUT the fstab
+# swap that NX549J_EXPERIMENTAL_GSI_AONLY additionally performs
+# (rootdir/Android.mk). Gap audit + staged migration plan:
+# /srv/forge/android/nx549j/VNDK_FULL_MIGRATION_20260717.md
+ifneq ($(filter true,$(NX549J_EXPERIMENTAL_GSI_AONLY) $(NX549J_FULL_VNDK)),)
 BOARD_VNDK_RUNTIME_DISABLE := false
 else
 BOARD_VNDK_RUNTIME_DISABLE := true
