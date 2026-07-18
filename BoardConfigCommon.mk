@@ -138,15 +138,18 @@ BOARD_VENDOR_SEPOLICY_DIRS += $(COMMON_PATH)/sepolicy/vendor
 # Treble
 PRODUCT_FULL_TREBLE_OVERRIDE := true
 BOARD_VNDK_VERSION := current
-# NX549J_FULL_VNDK=true drops the VNDK-lite runtime relaxation (ro.vndk.lite)
-# and gives the strict isolated vendor linker namespace, WITHOUT the fstab
-# swap that NX549J_EXPERIMENTAL_GSI_AONLY additionally performs
-# (rootdir/Android.mk). Gap audit + staged migration plan:
-# /srv/forge/android/nx549j/VNDK_FULL_MIGRATION_20260717.md
-ifneq ($(filter true,$(NX549J_EXPERIMENTAL_GSI_AONLY) $(NX549J_FULL_VNDK)),)
-BOARD_VNDK_RUNTIME_DISABLE := false
-else
+# VNDK-lite REMOVED (2026-07-18): full VNDK (strict isolated vendor linker
+# namespace, no ro.vndk.lite relaxation) is now the DEFAULT. The gap audit
+# (VNDK_FULL_MIGRATION_20260717.md) concluded the product is de-facto VNDK-clean
+# (everything LOS-built already builds under BOARD_VNDK_VERSION=current; the two
+# legacy islands - A9 fingerprint and 32-bit camera - are vendor-locally
+# contained and survive isolation; one portable stats blob applied). Set
+# NX549J_VNDK_LITE=true to restore the lite relaxation as a fallback if a HAL
+# fails to load under strict isolation.
+ifeq ($(NX549J_VNDK_LITE),true)
 BOARD_VNDK_RUNTIME_DISABLE := true
+else
+BOARD_VNDK_RUNTIME_DISABLE := false
 endif
 
 # Wi-Fi
