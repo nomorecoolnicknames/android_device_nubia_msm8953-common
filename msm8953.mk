@@ -10,6 +10,13 @@ DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay-lineage
 
 PRODUCT_ENFORCE_RRO_TARGETS := *
 PRODUCT_ENFORCE_RRO_EXCLUDED_OVERLAYS += $(LOCAL_PATH)/overlay/packages/apps/CarrierConfig
+# NX549J: the SystemUI keyguard_clock_switch.xml overlay is a full layout
+# replacement that references SystemUI-internal resources (widget_big_font_size,
+# keyguard_status_area, etc.). As an auto-generated RRO it only links against
+# framework-res + lineage platform-res, so those refs fail. Exclude it from RRO
+# enforcement so it compiles as a static overlay into SystemUI, where the
+# internal resources resolve.
+PRODUCT_ENFORCE_RRO_EXCLUDED_OVERLAYS += $(LOCAL_PATH)/overlay/frameworks/base/packages/SystemUI
 
 # Screen density
 PRODUCT_AAPT_CONFIG := normal
